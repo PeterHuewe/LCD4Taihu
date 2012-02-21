@@ -31,20 +31,20 @@
 #define CMD_SET_HOME 0x80
 
 /*<2>*/
-static volatile void *data_mmap;
-static volatile void *cmd_mmap;
-static volatile void *bckl_mmap;
+static volatile __iomem void *data_mmap;
+static volatile __iomem void *cmd_mmap;
+static volatile __iomem void *bckl_mmap;
 static unsigned char g_addr;
 
 static int taihu_lcd_open(struct inode *dev_file, struct file *f_instance);
-ssize_t taihu_lcd_write(struct file *filp, const char __user * buf, size_t count, loff_t * f_pos);
+static ssize_t taihu_lcd_write(struct file *filp, const char __user * buf, size_t count, loff_t * f_pos);
 static int __init taihu_lcd_init(void);
 static void __exit taihu_lcd_cleanup(void);
 
 static int taihu_lcd_open(struct inode *dev_file, struct file *f_instance)
 {
 	if (!(f_instance->f_flags & O_APPEND)) {	// If we do not append to device we flush it
-		iowrite8(CMD_CLEAR_DISPLAY, (void *)cmd_mmap);	//flush and return home
+		iowrite8(CMD_CLEAR_DISPLAY, (void __iomem *)cmd_mmap);	//flush and return home
 		udelay(2000);
 		g_addr = CMD_SET_HOME;	//set cursor to first line, first character
 	}
@@ -52,7 +52,7 @@ static int taihu_lcd_open(struct inode *dev_file, struct file *f_instance)
 }
 
 /*<3>*/
-ssize_t taihu_lcd_write(struct file * filp, const char __user * buf, size_t count, loff_t * f_pos)
+static ssize_t taihu_lcd_write(struct file * filp, const char __user * buf, size_t count, loff_t * f_pos)
 {
 	size_t i = 0;
 	unsigned char *ks_buf = kmalloc(count + 1, GFP_KERNEL);	//+1 for nullbyte
@@ -62,14 +62,14 @@ ssize_t taihu_lcd_write(struct file * filp, const char __user * buf, size_t coun
 	} else {
 		if (!copy_from_user(ks_buf, buf, count)) {
 			for (i = 0; i < count; i++) {
-				iowrite8(ks_buf[i], (void *)data_mmap);
+				iowrite8(ks_buf[i], (void __iomem *)data_mmap);
 				udelay(2000);
 				g_addr++;
 				if (g_addr & 0x10)	//end of lineclass_ reached - change to other line <4>
 				{
 					g_addr ^= 0x40;	// Toggle Second line
 					g_addr &= 0xC0;	// Reset cursor to first char of line
-					iowrite8(g_addr, (void *)cmd_mmap);
+					iowrite8(g_addr, (void __iomem *)cmd_mmap);
 					udelay(2000);
 				}
 			}
@@ -93,33 +93,33 @@ static struct file_operations taihu_lcd_ops = {
 static ssize_t store_hex_cmd(struct device *dev, struct device_attribute *attr, const char *buffer, size_t size)
 {
 	char new = simple_strtol(buffer, NULL, 16);
-	iowrite8(new, (void *)cmd_mmap);
+	iowrite8(new, (void __iomem *)cmd_mmap);
 	return 4;
 }
 
 static ssize_t store_hex_data(struct device *dev, struct device_attribute *attr, const char *buffer, size_t size)
 {
 	char new = simple_strtol(buffer, NULL, 16);
-	iowrite8(new, (void *)data_mmap);
+	iowrite8(new, (void __iomem *)data_mmap);
 	return 4;
 }
 
 static ssize_t store_cmd(struct device *dev, struct device_attribute *attr, const char *buffer, size_t size)
 {
-	iowrite8(buffer[0], (void *)cmd_mmap);
+	iowrite8(buffer[0], (void __iomem *)cmd_mmap);
 	return 1;
 }
 
 static ssize_t store_data(struct device *dev, struct device_attribute *attr, const char *buffer, size_t size)
 {
-	iowrite8(buffer[0], (void *)data_mmap);
+	iowrite8(buffer[0], (void __iomem *)data_mmap);
 	return 1;
 }
 
 static ssize_t get_backlight(struct device *dev, struct device_attribute *attr, char *buffer)
 {
 	ssize_t len = 0;
-	char backlight = ioread8((void *)bckl_mmap);
+	char backlight = ioread8((void __iomem *)bckl_mmap);
 	backlight >>= 1;
 	backlight &= 0x01;
 	len = snprintf(buffer, 3, "%d\n", backlight);
@@ -129,7 +129,7 @@ static ssize_t get_backlight(struct device *dev, struct device_attribute *attr, 
 static ssize_t set_backlight(struct device *dev, struct device_attribute *attr, const char *buffer, size_t size)
 {
 	char on;
-	char backlight = ioread8((void *)bckl_mmap);
+	char backlight = ioread8((void __iomem *)bckl_mmap);
 	on = simple_strtol(buffer, NULL, 2);
 	if (on == 1) {
 		backlight |= 0x02;
@@ -138,16 +138,16 @@ static ssize_t set_backlight(struct device *dev, struct device_attribute *attr, 
 	} else {		// Error
 		return -EINVAL;
 	}
-	iowrite8(backlight, (void *)bckl_mmap);
+	iowrite8(backlight, (void __iomem *)bckl_mmap);
 	return size;
 }
 
 /*<7>*/
-DEVICE_ATTR(hex_cmd, S_IWUSR, NULL, store_hex_cmd);
-DEVICE_ATTR(hex_data, S_IWUSR, NULL, store_hex_data);
-DEVICE_ATTR(cmd, S_IWUSR, NULL, store_cmd);
-DEVICE_ATTR(data, S_IWUSR, NULL, store_data);
-DEVICE_ATTR(backlight, S_IRUGO | S_IWUSR, get_backlight, set_backlight);
+static DEVICE_ATTR(hex_cmd, S_IWUSR, NULL, store_hex_cmd);
+static DEVICE_ATTR(hex_data, S_IWUSR, NULL, store_hex_data);
+static DEVICE_ATTR(cmd, S_IWUSR, NULL, store_cmd);
+static DEVICE_ATTR(data, S_IWUSR, NULL, store_data);
+static DEVICE_ATTR(backlight, S_IRUGO | S_IWUSR, get_backlight, set_backlight);
 
 /*<8>*/
 static struct miscdevice taihu_miscdev = {
@@ -178,10 +178,10 @@ static int __init taihu_lcd_init(void)
 	}
 
 /*<11>*/
-	cmd_mmap = ioremap((unsigned long)LCD_CMD_ADDR, 1);
-	data_mmap = ioremap((unsigned long)LCD_DATA_ADDR, 1);
-	bckl_mmap = ioremap((unsigned long)LCD_BCKL_ADDR, 1);
-	iowrite8(CMD_CLEAR_DISPLAY, (void *)cmd_mmap);
+	cmd_mmap = ioremap((resource_size_t)LCD_CMD_ADDR, 1);
+	data_mmap = ioremap((resource_size_t)LCD_DATA_ADDR, 1);
+	bckl_mmap = ioremap((resource_size_t)LCD_BCKL_ADDR, 1);
+	iowrite8(CMD_CLEAR_DISPLAY, (void __iomem *)cmd_mmap);
 	g_addr = CMD_SET_HOME;
 	udelay(2000);
 
