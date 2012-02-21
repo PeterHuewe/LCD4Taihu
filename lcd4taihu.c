@@ -2,6 +2,15 @@
 
    Copyright 2008-2012 Peter Huewe <peterhuewe (at) gmx.de>
 
+   This is a simple driver for the LCD Character Display on AMCC's taihu
+   development platform.
+   This driver was created as a project work during my studies and is just
+   updated to the latest kernel versions, as I don't have the hardware anymore.
+
+   Please consider writing me an email if you use this driver successfully.
+   AMCC and Taihu are (probabl) registered Trademarks of.
+   Applied Micro Circuits Corporation - I'm in not affiliated with them.
+
    This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
    the Free Software Foundation, either version 2 of the License, or
