@@ -1,0 +1,11 @@
+-- Copyright --
+Copyright 2008 Peter Huewe <peterhuewe (at) gmx.de>
+
+-- About --
+This shall become a small and easy to use driver for the LCD display module on AMCC's Taihu Reference Board
+
+-- Licence --
+This code is licenced under GPL v3 or later.
+See gpl.txt for more information
+
+
