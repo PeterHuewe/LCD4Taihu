@@ -1,6 +1,6 @@
 /*
 
-   Copyright 2008 Peter Huewe <peterhuewe (at) gmx.de>
+   Copyright 2008-2012 Peter Huewe <peterhuewe (at) gmx.de>
 
    This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -15,29 +15,13 @@
 
 
 */
-
-#include <linux/module.h>
-#include <linux/moduleparam.h>
-#include <linux/init.h>
-
-#include <linux/kernel.h>	/* printk() */
-#include <linux/slab.h>		/* kmalloc() */
-#include <linux/fs.h>		/* everything... */
-#include <linux/errno.h>	/* error codes */
-#include <linux/types.h>	/* size_t */
-#include <linux/mm.h>
-#include <linux/kdev_t.h>
-#include <asm/page.h>
-#include <linux/cdev.h>
-
-#include <linux/device.h>
-#include <linux/ioport.h>
-#include <linux/delay.h>
-#include <asm/io.h>
 #include <asm/uaccess.h>
-#include <linux/errno.h>
-#include <linux/stat.h>		//Modes
+#include <linux/device.h>
+#include <linux/delay.h>
+#include <linux/fs.h>		/* everything... */
 #include <linux/miscdevice.h>
+#include <linux/module.h>
+#include <linux/slab.h>		/* kmalloc() */
 
 /*<1>*/
 #define LCD_BCKL_ADDR  0x50100001
@@ -144,12 +128,12 @@ static ssize_t get_backlight(struct device *dev, struct device_attribute *attr, 
 
 static ssize_t set_backlight(struct device *dev, struct device_attribute *attr, const char *buffer, size_t size)
 {
-	char new;
+	char on;
 	char backlight = ioread8((void *)bckl_mmap);
-	new = simple_strtol(buffer, NULL, 2);
-	if (new == 1) {
+	on = simple_strtol(buffer, NULL, 2);
+	if (on == 1) {
 		backlight |= 0x02;
-	} else if (new == 0) {
+	} else if (on == 0) {
 		backlight &= ~(0x02);
 	} else {		// Error
 		return -EINVAL;
@@ -167,9 +151,9 @@ DEVICE_ATTR(backlight, S_IRUGO | S_IWUSR, get_backlight, set_backlight);
 
 /*<8>*/
 static struct miscdevice taihu_miscdev = {
-	255,			// dynamic minor please :)
-	"lcds",
-	&taihu_lcd_ops
+	.minor = MISC_DYNAMIC_MINOR,			// dynamic minor please :)
+	.name = "lcds",
+	.fops = &taihu_lcd_ops
 };
 
 static int __init taihu_lcd_init(void)
