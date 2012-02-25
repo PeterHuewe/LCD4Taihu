@@ -205,16 +205,16 @@ static int __init taihu_lcd_init(void)
 
 /*<13>*/
 	//err_3:
-	printk(KERN_DEBUG "cleanup - releasing mem_region for lcd_cmd_addr\n ");
+	printk(KERN_DEBUG "cleanup - releasing mem_region for lcd_cmd_addr\n");
 	release_mem_region(LCD_BCKL_ADDR, 1L);
 err_2:
-	printk(KERN_DEBUG "cleanup - releasing mem_region for lcd_cmd_addr\n ");
+	printk(KERN_DEBUG "cleanup - releasing mem_region for lcd_cmd_addr\n");
 	release_mem_region(LCD_CMD_ADDR, 1L);
 err_1:
-	printk(KERN_DEBUG "cleanup - releasing mem_region for lcd_data_addr\n ");
+	printk(KERN_DEBUG "cleanup - releasing mem_region for lcd_data_addr\n");
 	release_mem_region(LCD_DATA_ADDR, 1L);
 err_0:
-	printk(KERN_DEBUG "Nothing left to clean up - Bailing out\n ");
+	printk(KERN_DEBUG "Nothing left to clean up - Bailing out\n");
 	return status;
 }
 
