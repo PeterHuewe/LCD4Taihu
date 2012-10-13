@@ -31,6 +31,7 @@
 #include <linux/miscdevice.h>
 #include <linux/module.h>
 #include <linux/slab.h>		/* kmalloc() */
+#include <linux/io.h>		/* iowrite8/ioread8 */
 
 /*<1>*/
 #define LCD_BCKL_ADDR  0x50100001
