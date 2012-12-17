@@ -205,9 +205,6 @@ static int __init taihu_lcd_init(void)
 	return 0;
 
 /*<13>*/
-	//err_3:
-	printk(KERN_DEBUG "cleanup - releasing mem_region for lcd_cmd_addr\n");
-	release_mem_region(LCD_BCKL_ADDR, 1L);
 err_2:
 	printk(KERN_DEBUG "cleanup - releasing mem_region for lcd_cmd_addr\n");
 	release_mem_region(LCD_CMD_ADDR, 1L);
