@@ -47,7 +47,7 @@ static volatile __iomem void *bckl_mmap;
 static unsigned char g_addr;
 
 static int taihu_lcd_open(struct inode *dev_file, struct file *f_instance);
-static ssize_t taihu_lcd_write(struct file *filp, const char __user * buf, size_t count, loff_t * f_pos);
+static ssize_t taihu_lcd_write(struct file *filp, const char __user *buf, size_t count, loff_t *f_pos);
 static int __init taihu_lcd_init(void);
 static void __exit taihu_lcd_cleanup(void);
 
@@ -62,7 +62,7 @@ static int taihu_lcd_open(struct inode *dev_file, struct file *f_instance)
 }
 
 /*<3>*/
-static ssize_t taihu_lcd_write(struct file * filp, const char __user * buf, size_t count, loff_t * f_pos)
+static ssize_t taihu_lcd_write(struct file *filp, const char __user *buf, size_t count, loff_t *f_pos)
 {
 	size_t i = 0;
 	unsigned char *ks_buf = kmalloc(count + 1, GFP_KERNEL);	//+1 for nullbyte
