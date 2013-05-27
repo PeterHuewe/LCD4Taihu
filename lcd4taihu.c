@@ -53,10 +53,10 @@ static void __exit taihu_lcd_cleanup(void);
 
 static int taihu_lcd_open(struct inode *dev_file, struct file *f_instance)
 {
-	if (!(f_instance->f_flags & O_APPEND)) {	// If we do not append to device we flush it
-		iowrite8(CMD_CLEAR_DISPLAY, (void __iomem *)cmd_mmap);	//flush and return home
+	if (!(f_instance->f_flags & O_APPEND)) {	/* If we do not append to device we flush it */
+		iowrite8(CMD_CLEAR_DISPLAY, (void __iomem *)cmd_mmap);	/* flush and return home */
 		udelay(2000);
-		g_addr = CMD_SET_HOME;	//set cursor to first line, first character
+		g_addr = CMD_SET_HOME;	/* set cursor to first line, first character */
 	}
 	return 0;
 }
@@ -65,8 +65,8 @@ static int taihu_lcd_open(struct inode *dev_file, struct file *f_instance)
 static ssize_t taihu_lcd_write(struct file *filp, const char __user *buf, size_t count, loff_t *f_pos)
 {
 	size_t i = 0;
-	unsigned char *ks_buf = kmalloc(count + 1, GFP_KERNEL);	//+1 for nullbyte
-	(*f_pos) += count;	// TODO check how many bytes writen.
+	unsigned char *ks_buf = kmalloc(count + 1, GFP_KERNEL);	/* +1 for nullbyte */
+	(*f_pos) += count;	/* TODO check how many bytes writen. */
 	if (ks_buf == NULL) {
 		printk(KERN_EMERG "Kmalloc failed!\n");
 	} else {
@@ -75,16 +75,16 @@ static ssize_t taihu_lcd_write(struct file *filp, const char __user *buf, size_t
 				iowrite8(ks_buf[i], (void __iomem *)data_mmap);
 				udelay(2000);
 				g_addr++;
-				if (g_addr & 0x10)	//end of lineclass_ reached - change to other line <4>
+				if (g_addr & 0x10)	/* end of lineclass_ reached - change to other line <4> */
 				{
-					g_addr ^= 0x40;	// Toggle Second line
-					g_addr &= 0xC0;	// Reset cursor to first char of line
+					g_addr ^= 0x40;	/* Toggle Second line */
+					g_addr &= 0xC0;	/* Reset cursor to first char of line */
 					iowrite8(g_addr, (void __iomem *)cmd_mmap);
 					udelay(2000);
 				}
 			}
 		} else {
-			ks_buf[count] = '\0';	//Nullbyte for printing
+			ks_buf[count] = '\0';	/* Nullbyte for printing */
 			printk("Copy from user failed! Value %s anzahl %zd\n", ks_buf, count);
 		}
 		kfree(ks_buf);
@@ -145,7 +145,7 @@ static ssize_t set_backlight(struct device *dev, struct device_attribute *attr, 
 		backlight |= 0x02;
 	} else if (on == 0) {
 		backlight &= ~(0x02);
-	} else {		// Error
+	} else {		/* Error */
 		return -EINVAL;
 	}
 	iowrite8(backlight, (void __iomem *)bckl_mmap);
@@ -161,7 +161,7 @@ static DEVICE_ATTR(backlight, S_IRUGO | S_IWUSR, get_backlight, set_backlight);
 
 /*<8>*/
 static struct miscdevice taihu_miscdev = {
-	.minor = MISC_DYNAMIC_MINOR,			// dynamic minor please :)
+	.minor = MISC_DYNAMIC_MINOR,			/* dynamic minor please :) */
 	.name = "lcds",
 	.fops = &taihu_lcd_ops
 };
