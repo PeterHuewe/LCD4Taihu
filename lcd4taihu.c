@@ -174,15 +174,18 @@ static int __init taihu_lcd_init(void)
 	int status = -ENODEV;
 
 /*<9>*/
-	if ((res_cmd_data = request_mem_region(LCD_CMD_ADDR, 1L, "lcdcmd")) == NULL) {
+	res_cmd_data = request_mem_region(LCD_CMD_ADDR, 1L, "lcdcmd");
+	if (res_cmd_data == NULL) {
 		pr_err("An error occured while requesting mem_region for lcd_cmd_addr\n");
 		goto err_0;	/*<10> */
 	}
-	if ((res_lcd_data = request_mem_region(LCD_DATA_ADDR, 1L, "lcddata")) == NULL) {
+	res_lcd_data = request_mem_region(LCD_DATA_ADDR, 1L, "lcddata");
+	if (res_lcd_data == NULL) {
 		pr_err("An error occured while requesting mem_region for lcd_data_addr\n");
 		goto err_1;
 	}
-	if ((res_lcd_bckl = request_mem_region(LCD_BCKL_ADDR, 1L, "lcdbckl")) == NULL) {
+	res_lcd_bckl = request_mem_region(LCD_BCKL_ADDR, 1L, "lcdbckl");
+	if (res_lcd_bckl == NULL) {
 		pr_err("An error occured while requesting mem_region for lcd_bckl_addr\n");
 		goto err_2;
 	}
