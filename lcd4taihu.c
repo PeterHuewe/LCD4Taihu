@@ -92,7 +92,7 @@ static ssize_t taihu_lcd_write(struct file *filp, const char __user *buf, size_t
 }
 
 /*<5>*/
-static struct file_operations taihu_lcd_ops = {
+static const struct file_operations taihu_lcd_ops = {
 	.owner = THIS_MODULE,
 	.open = taihu_lcd_open,
 	.write = taihu_lcd_write
