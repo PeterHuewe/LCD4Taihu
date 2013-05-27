@@ -75,8 +75,7 @@ static ssize_t taihu_lcd_write(struct file *filp, const char __user *buf, size_t
 				iowrite8(ks_buf[i], (void __iomem *)data_mmap);
 				udelay(2000);
 				g_addr++;
-				if (g_addr & 0x10)	/* end of lineclass_ reached - change to other line <4> */
-				{
+				if (g_addr & 0x10) {	/* end of lineclass_ reached - change to other line <4> */
 					g_addr ^= 0x40;	/* Toggle Second line */
 					g_addr &= 0xC0;	/* Reset cursor to first char of line */
 					iowrite8(g_addr, (void __iomem *)cmd_mmap);
@@ -102,15 +101,27 @@ static struct file_operations taihu_lcd_ops = {
 /*<6>*/
 static ssize_t store_hex_cmd(struct device *dev, struct device_attribute *attr, const char *buffer, size_t size)
 {
-	char new = simple_strtol(buffer, NULL, 16);
-	iowrite8(new, (void __iomem *)cmd_mmap);
+	u8 new;
+	int rc;
+	rc = kstrtou8(buffer, 16, &new);
+	if (rc == 0)
+		iowrite8(new, (void __iomem *)cmd_mmap);
+	else
+		return rc;
+
 	return 4;
 }
 
 static ssize_t store_hex_data(struct device *dev, struct device_attribute *attr, const char *buffer, size_t size)
 {
-	char new = simple_strtol(buffer, NULL, 16);
-	iowrite8(new, (void __iomem *)data_mmap);
+	u8 new;
+	int rc;
+	rc = kstrtou8(buffer, 16, &new);
+	if (rc == 0)
+		iowrite8(new, (void __iomem *)data_mmap);
+	else
+		return rc;
+
 	return 4;
 }
 
@@ -138,15 +149,20 @@ static ssize_t get_backlight(struct device *dev, struct device_attribute *attr, 
 
 static ssize_t set_backlight(struct device *dev, struct device_attribute *attr, const char *buffer, size_t size)
 {
-	char on;
+	u8 on;
+	int rc;
 	char backlight = ioread8((void __iomem *)bckl_mmap);
-	on = simple_strtol(buffer, NULL, 2);
-	if (on == 1) {
-		backlight |= 0x02;
-	} else if (on == 0) {
-		backlight &= ~(0x02);
+	rc = kstrtou8(buffer, 2, &on);
+	if (rc == 0) {
+		if (on == 1)
+			backlight |= 0x02;
+		else if (on == 0)
+			backlight &= ~(0x02);
+		else		/* Error */
+			return -EINVAL;
+
 	} else {		/* Error */
-		return -EINVAL;
+		return rc;
 	}
 	iowrite8(backlight, (void __iomem *)bckl_mmap);
 	return size;
