@@ -68,7 +68,7 @@ static ssize_t taihu_lcd_write(struct file *filp, const char __user *buf, size_t
 	unsigned char *ks_buf = kmalloc(count + 1, GFP_KERNEL);	/* +1 for nullbyte */
 	(*f_pos) += count;	/* TODO check how many bytes writen. */
 	if (ks_buf == NULL) {
-		printk(KERN_EMERG "Kmalloc failed!\n");
+		pr_crit("Kmalloc failed!\n");
 	} else {
 		if (!copy_from_user(ks_buf, buf, count)) {
 			for (i = 0; i < count; i++) {
@@ -85,7 +85,7 @@ static ssize_t taihu_lcd_write(struct file *filp, const char __user *buf, size_t
 			}
 		} else {
 			ks_buf[count] = '\0';	/* Nullbyte for printing */
-			printk("Copy from user failed! Value %s anzahl %zd\n", ks_buf, count);
+			pr_err("Copy from user failed! Value %s anzahl %zd\n", ks_buf, count);
 		}
 		kfree(ks_buf);
 	}
@@ -175,15 +175,15 @@ static int __init taihu_lcd_init(void)
 
 /*<9>*/
 	if ((res_cmd_data = request_mem_region(LCD_CMD_ADDR, 1L, "lcdcmd")) == NULL) {
-		printk(KERN_ERR "An error occured while requesting mem_region for lcd_cmd_addr\n");
+		pr_err("An error occured while requesting mem_region for lcd_cmd_addr\n");
 		goto err_0;	/*<10> */
 	}
 	if ((res_lcd_data = request_mem_region(LCD_DATA_ADDR, 1L, "lcddata")) == NULL) {
-		printk(KERN_ERR "An error occured while requesting mem_region for lcd_data_addr\n");
+		pr_err("An error occured while requesting mem_region for lcd_data_addr\n");
 		goto err_1;
 	}
 	if ((res_lcd_bckl = request_mem_region(LCD_BCKL_ADDR, 1L, "lcdbckl")) == NULL) {
-		printk(KERN_ERR "An error occured while requesting mem_region for lcd_bckl_addr\n");
+		pr_err("An error occured while requesting mem_region for lcd_bckl_addr\n");
 		goto err_2;
 	}
 
@@ -206,13 +206,13 @@ static int __init taihu_lcd_init(void)
 
 /*<13>*/
 err_2:
-	printk(KERN_DEBUG "cleanup - releasing mem_region for lcd_cmd_addr\n");
+	pr_debug("cleanup - releasing mem_region for lcd_cmd_addr\n");
 	release_mem_region(LCD_CMD_ADDR, 1L);
 err_1:
-	printk(KERN_DEBUG "cleanup - releasing mem_region for lcd_data_addr\n");
+	pr_debug("cleanup - releasing mem_region for lcd_data_addr\n");
 	release_mem_region(LCD_DATA_ADDR, 1L);
 err_0:
-	printk(KERN_DEBUG "Nothing left to clean up - Bailing out\n");
+	pr_debug("Nothing left to clean up - Bailing out\n");
 	return status;
 }
 
